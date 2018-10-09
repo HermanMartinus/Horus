@@ -34,10 +34,16 @@ def add_otp(service, secret):
     jsonFile.close()
 
 def create_password(service):
+    special_characters = "!@#$%^&*()"
     combo = service + data['seed']
     hash_object = hashlib.md5(combo.encode())
     password = hash_object.hexdigest()
-    password = "@{0}{1}!".format(password[0:7].upper(), password[8:15].lower())
+    password = "{0}{1}{2}{3}".format(
+        special_characters[len(service) % 10],
+        password[0:7].upper(),
+        password[8:15].lower(),
+        special_characters[len(service) % 9],
+        )
     return password
 
 def set_seed(seed):
