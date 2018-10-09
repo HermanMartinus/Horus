@@ -35,26 +35,23 @@ def add_otp(service, secret):
 
 def create_password(service):
     special_characters = "!@#$%^&*()"
-    combo = service + data['seed']
-    hash_object = hashlib.md5(combo.encode())
-    password = hash_object.hexdigest()
-    password = "{0}{1}{2}{3}".format(
-        special_characters[len(service) % 10],
-        password[0:7].upper(),
-        password[8:15].lower(),
-        special_characters[len(service) % 9],
-        )
-    return password
+    if os.environ.has_key('HORUS_SEED'):
+        combo = service + os.environ.get('HORUS_SEED')
+        hash_object = hashlib.md5(combo.encode())
+        password = hash_object.hexdigest()
+        password = "{0}{1}{2}{3}".format(
+            special_characters[len(service) % 10],
+            password[0:7].upper(),
+            password[8:15].lower(),
+            special_characters[len(service) % 9],
+            )
+        return password
+    else:
+        print ("You first need to set your env variables. See the Horus docs for instructions")
 
-def set_seed(seed):
-    data['seed'] = seed
-    jsonFile = open(file_path, "w+")
-    jsonFile.write(json.dumps(data))
-    jsonFile.close()
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--pwd', help='Get/generate password')
-parser.add_argument('--seed', help='Set password seed')
 parser.add_argument('--tfa', help='Get 2fa code')
 parser.add_argument('--atfa', help='Add 2fa code')
 if parser.parse_args().pwd:
@@ -66,5 +63,4 @@ elif parser.parse_args().tfa:
     print tfa, '- <copied to clipboard>'
 elif parser.parse_args().atfa:
     add_otp(parser.parse_args().atfa.lower(), raw_input("Paste the 2fa secret: "))
-elif parser.parse_args().seed:
-    set_seed(parser.parse_args().seed.lower())
+    print ('2fa account added')
