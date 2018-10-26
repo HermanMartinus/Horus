@@ -26,7 +26,7 @@ def get_otp(account):
         one_time_password = get_totp_token(data['accounts'][account]['secret'])
         return one_time_password
     else:
-        return "Account does not exist"
+        return False
 
 def add_otp(service, secret):
     data['accounts'][service] = {"secret": secret}
@@ -76,7 +76,10 @@ elif parser.parse_args().seed:
     add_seed(parser.parse_args().seed.lower())
 elif parser.parse_args().tfa:
     tfa = get_otp(parser.parse_args().tfa.lower())
-    copy_to_clipboard(tfa)
+    if tfa:
+        copy_to_clipboard(tfa)
+    else:
+        print ("Account does not exist")
 elif parser.parse_args().atfa:
     add_otp(parser.parse_args().atfa.lower(), raw_input("Paste the 2fa secret: "))
 else:
