@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import argparse, os
 import json
 import hmac, base64, struct, hashlib, time
@@ -32,35 +33,51 @@ def add_otp(service, secret):
     jsonFile = open(file_path, "w+")
     jsonFile.write(json.dumps(data))
     jsonFile.close()
+    print ('2fa account added')
+
+def add_seed(seed):
+    data['seed'] = seed
+    jsonFile = open(file_path, "w+")
+    jsonFile.write(json.dumps(data))
+    jsonFile.close()
+    print ('Seed added')
 
 def create_password(service):
-    special_characters = "!@#$%^&*()"
-    if os.environ.has_key('HORUS_SEED'):
-        combo = service + os.environ.get('HORUS_SEED')
+    special_characters = "!@#$%^&*()/"
+    if data['seed'] and len(data['seed']) > 0:
+        combo = service + data['seed']
         hash_object = hashlib.md5(combo.encode())
         password = hash_object.hexdigest()
         password = "{0}{1}{2}{3}".format(
             special_characters[len(service) % 10],
             password[0:7].upper(),
             password[8:15].lower(),
-            special_characters[len(service) % 9],
+            special_characters[10-(len(service) % 10)],
             )
         return password
     else:
-        print ("You first need to set your env variables. See the Horus docs for instructions")
+        print ("You first need to set your seed phrase. See the Horus docs for instructions")
+        return False
 
+def copy_to_clipboard(text):
+    os.system("echo '%s' | pbcopy" % (text))
+    print ('<copied to clipboard>')
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--pwd', help='Get/generate password')
+parser.add_argument('--pwd', '-p', help='Get/generate password')
+parser.add_argument('--seed', '-s', help='Set seed phrase')
 parser.add_argument('--tfa', help='Get 2fa code')
 parser.add_argument('--atfa', help='Add 2fa code')
 if parser.parse_args().pwd:
-    os.system("echo '%s' | pbcopy" % (create_password(parser.parse_args().pwd.lower())))
-    print ('<copied to clipboard>')
+    password = create_password(parser.parse_args().pwd.lower())
+    if password:
+        copy_to_clipboard(password)
+elif parser.parse_args().seed:
+    add_seed(parser.parse_args().seed.lower())
 elif parser.parse_args().tfa:
     tfa = get_otp(parser.parse_args().tfa.lower())
-    os.system("echo '%s' | pbcopy" % tfa)
-    print tfa, '- <copied to clipboard>'
+    copy_to_clipboard(tfa)
 elif parser.parse_args().atfa:
     add_otp(parser.parse_args().atfa.lower(), raw_input("Paste the 2fa secret: "))
-    print ('2fa account added')
+else:
+    print ('Horus - Keeper of the keys')
