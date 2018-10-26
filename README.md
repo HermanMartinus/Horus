@@ -14,7 +14,7 @@ Run the `setup.sh` file
 ```
 $ ./setup.sh
 ```
-Add the this line to .profile or .bash_profile in your home directory:
+Add the this line to `.profile` or `.bash_profile` in your home directory:
 ```
 export PATH=$PATH":$HOME/pwd"
 ```
