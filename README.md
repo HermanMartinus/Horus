@@ -16,7 +16,7 @@ $ ./setup.sh
 ```
 Add the this line to `.profile` or `.bash_profile` in your home directory:
 ```
-export PATH=$PATH":$HOME/pwd"
+export PATH=$PATH":$HOME/.pwd"
 ```
 Check that it's installed
 ```
